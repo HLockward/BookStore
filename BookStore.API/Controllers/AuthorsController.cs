@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using BookStore.API.Helpers;
 using BookStore.API.Models;
+using BookStore.API.ResourceParameters;
 using BookStore.API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,9 +29,10 @@ namespace BookStore.API.Controllers
 
         [HttpGet]
         [HttpHead]
-        public ActionResult<IEnumerable<AuthorDto>> GetAuthors()
+        public ActionResult<IEnumerable<AuthorDto>> GetAuthors(
+            [FromQuery] AuthorsResourceParameters authorsResourceParameters)
         {
-            var authorsFromRep = _bookLibraryRepository.GetAuthors();
+            var authorsFromRep = _bookLibraryRepository.GetAuthors(authorsResourceParameters);
 
 
             return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRep));

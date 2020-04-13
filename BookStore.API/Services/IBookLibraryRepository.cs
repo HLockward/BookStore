@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BookStore.API.Entities;
+using BookStore.API.ResourceParameters;
 
 namespace BookStore.API.Services
 {
@@ -12,6 +13,7 @@ namespace BookStore.API.Services
         void UpdateBook(Book book);
         void DeleteBook(Book book);
         IEnumerable<Author> GetAuthors();
+        public IEnumerable<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters);
         Author GetAuthor(Guid authorId);
         IEnumerable<Author> GetAuthors(IEnumerable<Guid> authorIds);
         void AddAuthor(Author author);
