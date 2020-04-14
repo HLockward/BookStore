@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace BookStore.API.Models
 {
     public class AuthorForCreationDto
@@ -10,5 +12,8 @@ namespace BookStore.API.Models
         public DateTimeOffset DateOfBirth { get; set; }
 
         public String MainCategory { get; set; }
+
+        public ICollection<BookForCreationDto> books { get; set; }
+            = new List<BookForCreationDto>();
     }
 }

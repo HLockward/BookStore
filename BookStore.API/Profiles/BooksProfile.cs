@@ -8,6 +8,8 @@ namespace BookStore.API.Profiles
         public BooksProfile()
         {
             CreateMap<Entities.Book, Models.BookDto>();
+
+            CreateMap<Models.BookForCreationDto, Entities.Book>();
         }
     }
 }
