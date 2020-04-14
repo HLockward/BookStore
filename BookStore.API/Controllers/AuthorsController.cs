@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using BookStore.API.Entities;
 using BookStore.API.Helpers;
 using BookStore.API.Models;
 using BookStore.API.ResourceParameters;
@@ -38,7 +39,7 @@ namespace BookStore.API.Controllers
             return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRep));
         }
 
-        [HttpGet("{authorId}")]
+        [HttpGet("{authorId}", Name ="GetAuthor")]
         [HttpHead]
         public ActionResult<AuthorDto> GetAuthor(Guid authorId)
         {
@@ -49,6 +50,20 @@ namespace BookStore.API.Controllers
             }
 
             return Ok(_mapper.Map<AuthorDto>(author));
+        }
+
+        [HttpPost]
+        public ActionResult<AuthorDto> CreateAuthor(AuthorForCreationDto authorForCreationDto)
+        {
+            var authorEntity = _mapper.Map<Author>(authorForCreationDto);
+            _bookLibraryRepository.AddAuthor(authorEntity);
+            _bookLibraryRepository.Save();
+
+            var authorToReturn = _mapper.Map<AuthorDto>(authorEntity);
+            return CreatedAtRoute("GetAuthor", new { authorId = authorToReturn.Id },
+                authorToReturn);
+
+
         }
     }
 }
