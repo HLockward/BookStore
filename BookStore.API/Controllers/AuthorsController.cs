@@ -65,5 +65,12 @@ namespace BookStore.API.Controllers
 
 
         }
+
+        [HttpOptions]
+        public IActionResult GetAuthorsOption()
+        {
+            Response.Headers.Add("Allow", "GET, POST, HEAD, OPTIONS");
+            return Ok();
+        }
     }
 }
