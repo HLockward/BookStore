@@ -4,7 +4,12 @@ using AutoMapper;
 using BookStore.API.Entities;
 using BookStore.API.Models;
 using BookStore.API.Services;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace BookStore.API.Controllers
 {
@@ -69,8 +74,89 @@ namespace BookStore.API.Controllers
 
 
             var bookToReturn = _mapper.Map<BookDto>(bookEntity);
-            return CreatedAtRoute("GetBookForAuthor", new { authorId = authorId, bookId = bookToReturn.Id },
+            return CreatedAtRoute("GetBookForAuthor", new { authorId, bookId = bookToReturn.Id },
                 bookToReturn);
-        } 
+        }
+
+        [HttpPut("{bookId}")]
+        public IActionResult UpdateBookForAuthor(Guid authorId, Guid bookId, BookForUpdateDto bookForUpdateDto)
+        {
+            if (!_bookLibraryRepository.AuthorExists(authorId))
+            {
+                return NotFound();
+            }
+
+            var bookFromRepo = _bookLibraryRepository.GetBook(authorId, bookId);
+            if(bookFromRepo == null)
+            {
+                var bookEntity = _mapper.Map<Book>(bookForUpdateDto);
+                bookEntity.Id = bookId;
+                _bookLibraryRepository.AddBook(authorId, bookEntity);
+                _bookLibraryRepository.Save();
+
+
+                var bookToReturn = _mapper.Map<BookDto>(bookEntity);
+                return CreatedAtRoute("GetBookForAuthor", new { authorId, bookId = bookToReturn.Id },
+                    bookToReturn);
+            }
+
+            _mapper.Map(bookForUpdateDto, bookFromRepo);
+            _bookLibraryRepository.UpdateBook(bookFromRepo);
+            _bookLibraryRepository.Save();
+
+            return NoContent();
+        }
+
+        [HttpPatch("{bookId}")]
+        public ActionResult PartiallyUpdateBookForAuthor(Guid authorId, Guid bookId,
+            JsonPatchDocument<BookForUpdateDto> patchDocument)
+        {
+            if (!_bookLibraryRepository.AuthorExists(authorId))
+            {
+                return NotFound();
+            }
+
+            var bookFromRepo = _bookLibraryRepository.GetBook(authorId, bookId);
+            if (bookFromRepo == null)
+            {
+                var bookForUpdateDto = new BookForUpdateDto();
+                patchDocument.ApplyTo(bookForUpdateDto, ModelState);
+
+                if (!TryValidateModel(bookForUpdateDto))
+                {
+                    return ValidationProblem(ModelState);
+                }
+
+                var bookToAdd = _mapper.Map<Book>(bookForUpdateDto);
+                bookToAdd.Id = bookId;
+
+                _bookLibraryRepository.AddBook(authorId, bookToAdd);
+                _bookLibraryRepository.Save();
+
+
+                var bookToReturn = _mapper.Map<BookDto>(bookToAdd);
+                return CreatedAtRoute("GetBookForAuthor", new { authorId, bookId = bookToReturn.Id },
+                    bookToReturn);
+
+
+            }
+
+            var BookToPatch = _mapper.Map<BookForUpdateDto>(bookFromRepo);
+
+            patchDocument.ApplyTo(BookToPatch, ModelState);
+
+            if (!TryValidateModel(BookToPatch))
+            {
+                return ValidationProblem(ModelState);
+            }
+
+
+            _mapper.Map(BookToPatch, bookFromRepo);
+            _bookLibraryRepository.UpdateBook(bookFromRepo);
+            _bookLibraryRepository.Save();
+
+            return NoContent();
+        }
+
     }
 }
