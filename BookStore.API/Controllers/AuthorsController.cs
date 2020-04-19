@@ -72,5 +72,21 @@ namespace BookStore.API.Controllers
             Response.Headers.Add("Allow", "GET, POST, HEAD, OPTIONS");
             return Ok();
         }
+
+        [HttpDelete("{authorId}")]
+        public IActionResult DeleteAuthor(Guid authorId)
+        {
+            var authorFromRepo = _bookLibraryRepository.GetAuthor(authorId);
+
+            if(authorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            _bookLibraryRepository.DeleteAuthor(authorFromRepo);
+            _bookLibraryRepository.Save();
+
+            return NoContent();
+        }
     }
 }

@@ -158,5 +158,26 @@ namespace BookStore.API.Controllers
             return NoContent();
         }
 
+        [HttpDelete("{bookId}")]
+        public IActionResult DeleteBookForAuthor(Guid authorId, Guid bookId)
+        {
+            if (!_bookLibraryRepository.AuthorExists(authorId))
+            {
+                return NotFound();
+            }
+
+            var bookFromRepo = _bookLibraryRepository.GetBook(authorId, bookId);
+
+            if(bookFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            _bookLibraryRepository.DeleteBook(bookFromRepo);
+            _bookLibraryRepository.Save();
+
+            return NoContent();
+        }
+
     }
 }
