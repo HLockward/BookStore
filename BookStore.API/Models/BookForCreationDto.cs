@@ -6,6 +6,9 @@ namespace BookStore.API.Models
 {
     public class BookForCreationDto : BookForManipulationDto
     {
+        public BookForCreationDto() : base()
+        {
+        }
     }
     
 }

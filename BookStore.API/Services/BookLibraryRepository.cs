@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BookStore.API.DbContexts;
 using BookStore.API.Entities;
+using BookStore.API.Helpers;
 using BookStore.API.ResourceParameters;
 
 namespace BookStore.API.Services
@@ -10,10 +11,14 @@ namespace BookStore.API.Services
     public class BookLibraryRepository : IBookLibraryRepository, IDisposable
     {
         private readonly BookLibraryContext _context;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public BookLibraryRepository(BookLibraryContext context)
+        public BookLibraryRepository(BookLibraryContext context,
+            IPropertyMappingService propertyMappingService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _propertyMappingService = propertyMappingService ??
+                throw new ArgumentNullException(nameof(propertyMappingService));
         }
 
         public void AddAuthor(Author author)
@@ -95,17 +100,11 @@ namespace BookStore.API.Services
             return _context.Authors.ToList<Author>();
         }
 
-        public IEnumerable<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
+        public PagedList<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
         {
             if(authorsResourceParameters == null)
             {
                 throw new ArgumentNullException(nameof(authorsResourceParameters));
-            }
-
-            if(String.IsNullOrWhiteSpace(authorsResourceParameters.MainCategory)
-                && String.IsNullOrWhiteSpace(authorsResourceParameters.SearchQuery))
-            {
-                return GetAuthors();
             }
 
             var collection = _context.Authors as IQueryable<Author>;
@@ -124,8 +123,19 @@ namespace BookStore.API.Services
                 || a.Name.Contains(searchQuery));
             }
 
+            if (!string.IsNullOrWhiteSpace(authorsResourceParameters.OrderBy))
+            {
+                var authorPropertyMappingDictionary =
+                _propertyMappingService.GetPropertyMapping<Models.AuthorDto, Author>();
 
-            return collection.ToList();
+                collection = collection.ApplaySort(authorsResourceParameters.OrderBy,
+                    authorPropertyMappingDictionary);
+            }
+            
+
+            return PagedList<Author>.Create(collection,
+                authorsResourceParameters.PageNumber,
+                authorsResourceParameters.PageSize);
         }
 
         public IEnumerable<Author> GetAuthors(IEnumerable<Guid> authorIds)

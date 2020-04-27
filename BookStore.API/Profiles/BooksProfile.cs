@@ -12,7 +12,6 @@ namespace BookStore.API.Profiles
 
             CreateMap<Models.BookForCreationDto, Entities.Book>();
             CreateMap<Models.BookForUpdateDto, Entities.Book>();
-
         }
     }
 }

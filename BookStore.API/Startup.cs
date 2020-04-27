@@ -83,6 +83,8 @@ namespace BookStore.API
                 };
             });
 
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IBookLibraryRepository, BookLibraryRepository>();
