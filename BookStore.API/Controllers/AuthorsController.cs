@@ -21,9 +21,11 @@ namespace BookStore.API.Controllers
         private readonly IBookLibraryRepository _bookLibraryRepository;
         private readonly IMapper _mapper;
         private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertycheckerService _propertycheckerService;
 
         public AuthorsController(IBookLibraryRepository bookLibraryRepository, IMapper mapper,
-            IPropertyMappingService propertyMappingService)
+            IPropertyMappingService propertyMappingService,
+            IPropertycheckerService propertycheckerService)
         {
             _bookLibraryRepository = bookLibraryRepository ??
                 throw new ArgumentNullException(nameof(bookLibraryRepository));
@@ -31,19 +33,29 @@ namespace BookStore.API.Controllers
                 throw new ArgumentNullException(nameof(mapper));
             _propertyMappingService = propertyMappingService ??
                 throw new ArgumentNullException(nameof(propertyMappingService));
+            _propertycheckerService = propertycheckerService ??
+                throw new ArgumentNullException(nameof(propertycheckerService));
         }
 
         [HttpGet(Name ="GetAuthors")]
         [HttpHead]
-        public ActionResult<IEnumerable<AuthorDto>> GetAuthors(
+        public IActionResult GetAuthors(
             [FromQuery] AuthorsResourceParameters authorsResourceParameters)
         {
-            if (!_propertyMappingService.ValidMappingExistingFor<AuthorDto, Author>(authorsResourceParameters.OrderBy))
+            if (!_propertyMappingService.ValidMappingExistingFor<AuthorDto, Author>
+                (authorsResourceParameters.OrderBy))
             {
                 return BadRequest();
             }
 
-            var authorsFromRep = _bookLibraryRepository.GetAuthors(authorsResourceParameters);
+            if (!_propertycheckerService.TypeHasProperties<AuthorDto>
+                (authorsResourceParameters.Fields))
+            {
+                return BadRequest();
+            }
+
+            var authorsFromRep = _bookLibraryRepository.
+                GetAuthors(authorsResourceParameters);
 
             var previousPageLink = authorsFromRep.HasPrevious ?
                 CreateAuthorsResourceUri(authorsResourceParameters,
@@ -66,20 +78,26 @@ namespace BookStore.API.Controllers
             Response.Headers.Add("X-Pagination",
                 JsonSerializer.Serialize(paginationMetadata));
 
-            return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRep));
+            return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRep)
+                .ShapeData(authorsResourceParameters.Fields));
         }
 
         [HttpGet("{authorId}", Name ="GetAuthor")]
         [HttpHead]
-        public ActionResult<AuthorDto> GetAuthor(Guid authorId)
+        public IActionResult GetAuthor(Guid authorId, string fields)
         {
+            if (!_propertycheckerService.TypeHasProperties<AuthorDto>(fields))
+            {
+                return BadRequest();
+            }
+
             var author = _bookLibraryRepository.GetAuthor(authorId);
             if(author == null)
             {
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<AuthorDto>(author));
+            return Ok(_mapper.Map<AuthorDto>(author).ShapeData(fields));
         }
 
         [HttpPost]
@@ -128,6 +146,7 @@ namespace BookStore.API.Controllers
                     return Url.Link("GetAuthors",
                         new
                         {
+                            fields = authorsResourceParameters.Fields,
                             orderBy = authorsResourceParameters.OrderBy,
                             pageNumber = authorsResourceParameters.PageNumber - 1,
                             pageSize = authorsResourceParameters.PageSize,
@@ -138,6 +157,7 @@ namespace BookStore.API.Controllers
                     return Url.Link("GetAuthors",
                         new
                         {
+                            fields = authorsResourceParameters.Fields,
                             orderBy = authorsResourceParameters.OrderBy,
                             pageNumber = authorsResourceParameters.PageNumber + 1,
                             pageSize = authorsResourceParameters.PageSize,
@@ -148,6 +168,7 @@ namespace BookStore.API.Controllers
                     return Url.Link("GetAuthors",
                         new
                         {
+                            fields = authorsResourceParameters.Fields,
                             orderBy = authorsResourceParameters.OrderBy,
                             pageNumber = authorsResourceParameters.PageNumber + 1,
                             pageSize = authorsResourceParameters.PageSize,

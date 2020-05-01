@@ -85,6 +85,8 @@ namespace BookStore.API
 
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
 
+            services.AddTransient<IPropertycheckerService, PropertycheckerService>();
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IBookLibraryRepository, BookLibraryRepository>();
