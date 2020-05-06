@@ -27,7 +27,7 @@ namespace BookStore.API.Controllers
             _mapper = mapper ??
                 throw new ArgumentNullException(nameof(mapper));
         }
-        [HttpGet]
+        [HttpGet(Name ="GetBooksForAuthor")]
         [HttpHead]
         public ActionResult<IEnumerable<BookDto>> GetBooksForAuthor(Guid authorId)
         {
@@ -60,7 +60,7 @@ namespace BookStore.API.Controllers
             return Ok(_mapper.Map<BookDto>(bookForAuthorFromRepo));
         }
 
-        [HttpPost]
+        [HttpPost(Name = "CreateBookForAuthor")]
         public ActionResult<BookDto> CreateBookForAuthor(Guid authorId, BookForCreationDto bookForCreationDto)
         {
             if (!_bookLibraryRepository.AuthorExists(authorId))

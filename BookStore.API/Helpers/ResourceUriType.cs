@@ -4,6 +4,7 @@ namespace BookStore.API.Helpers
     public enum ResourceUriType
     {
         PreviousPage,
-        NextPage
+        NextPage,
+        Current
     }
 }

@@ -11,7 +11,7 @@ namespace BookStore.API.Helpers
         public int PageSize { get; private set; }
         public int TotalCount { get; private set; }
         public bool HasPrevious => (CurrentPage > 1);
-        public bool HasNext => (CurrentPage < TotalCount);
+        public bool HasNext => (CurrentPage < TotalPages);
 
         public PagedList(List<T> items, int count, int pageNumber, int pageSize )
         {
