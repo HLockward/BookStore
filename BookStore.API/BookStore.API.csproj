@@ -15,6 +15,7 @@
     <Folder Include="Profiles\" />
     <Folder Include="ResourceParameters\" />
     <Folder Include="ValidationAttributes\" />
+    <Folder Include="ActionConstraints\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.3" />

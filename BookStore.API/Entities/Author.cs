@@ -20,6 +20,8 @@ namespace BookStore.API.Entities
         [Required]
         public DateTimeOffset DateOfBirth { get; set; }
 
+        public DateTimeOffset? DateOfDeath { get; set; }
+
         [Required]
         [MaxLength(50)]
         public String MainCategory { get; set; }
