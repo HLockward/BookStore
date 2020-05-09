@@ -13,8 +13,9 @@ using Microsoft.Extensions.Options;
 
 namespace BookStore.API.Controllers
 {
-    [Route("api/authors/{authorId}/books")]
     [ApiController]
+    [Route("api/authors/{authorId}/books")]
+    [ResponseCache(CacheProfileName = "240SecondsCacheProfile")]
     public class BooksController : ControllerBase
     {
         private readonly IBookLibraryRepository _bookLibraryRepository;
@@ -43,6 +44,7 @@ namespace BookStore.API.Controllers
 
         [HttpGet("{bookId}", Name = "GetBookForAuthor")]
         [HttpHead]
+        [ResponseCache(Duration = 120)]
         public ActionResult<BookDto> GetBookForAuthor(Guid authorId, Guid bookId)
         {
             if (!_bookLibraryRepository.AuthorExists(authorId))

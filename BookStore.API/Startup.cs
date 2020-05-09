@@ -32,9 +32,16 @@ namespace BookStore.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddResponseCaching();
+
             services.AddControllers(setupAction =>
             {
                 setupAction.ReturnHttpNotAcceptable = true;
+                setupAction.CacheProfiles.Add("240SecondsCacheProfile",
+                                                new CacheProfile()
+                                                {
+                                                    Duration = 240
+                                                });
 
             }).AddNewtonsoftJson(setupAction =>
             {
@@ -129,6 +136,7 @@ namespace BookStore.API
                 });
             }
 
+            app.UseResponseCaching();
 
             app.UseRouting();
 
