@@ -4,6 +4,7 @@ using AutoMapper;
 using BookStore.API.Entities;
 using BookStore.API.Models;
 using BookStore.API.Services;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -15,7 +16,9 @@ namespace BookStore.API.Controllers
 {
     [ApiController]
     [Route("api/authors/{authorId}/books")]
-    [ResponseCache(CacheProfileName = "240SecondsCacheProfile")]
+    //[ResponseCache(CacheProfileName = "240SecondsCacheProfile")]
+    [HttpCacheExpiration(CacheLocation = CacheLocation.Public)]
+    [HttpCacheValidation(MustRevalidate = true)]
     public class BooksController : ControllerBase
     {
         private readonly IBookLibraryRepository _bookLibraryRepository;
@@ -44,7 +47,8 @@ namespace BookStore.API.Controllers
 
         [HttpGet("{bookId}", Name = "GetBookForAuthor")]
         [HttpHead]
-        [ResponseCache(Duration = 120)]
+       // [ResponseCache(Duration = 120)]
+       [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = 1000)]
         public ActionResult<BookDto> GetBookForAuthor(Guid authorId, Guid bookId)
         {
             if (!_bookLibraryRepository.AuthorExists(authorId))
